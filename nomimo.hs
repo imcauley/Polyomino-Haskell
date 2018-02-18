@@ -1,4 +1,8 @@
+-- Isaac McAuley
+-- Febuary 2018
+
 import Data.List
+import Data.Char
 
 type Block = (Char, Int, Int)
 type Piece = [Block]
@@ -17,6 +21,10 @@ piece4 :: Piece
 piece4 = [('A', 0, 0),('A', 0, 1),('A', 1, 1)]
 piece5 :: Piece
 piece5 = [('B', 0, 0)]
+
+parsePiece :: String -> Char -> Piece
+parsePiece [] _ = []
+parsePiece (s1:a:s2:b:rest) c = (c,(digitToInt a), (digitToInt b)) : (parsePiece rest c)
 
 findSolutions :: [Piece] -> (Int,Int) -> [Board]
 findSolutions [] _ = [[]]
@@ -62,21 +70,23 @@ rotate :: Piece -> Piece
 rotate [] = []
 rotate ((b, bx, by):bs) = ((b, by, (-bx)): (rotate bs))
 
-maxX :: Piece -> Int
-maxX [] = 0
-maxX ((b, bx, by):bs)
-  | bx >= (maxX bs) = bx
-  | otherwise = maxX bs
-
-maxY :: Piece -> Int
-maxY [] = 0
-maxY ((b, bx, by):bs)
-  | by >= (maxX bs) = by
-  | otherwise = maxX bs
+maxes :: Piece -> Bool -> Int
+maxes [] _ = 0
+maxes ((b, bx, by):bs) c =
+  if c == True
+    then
+      if bx >= (maxes bs True)
+        then bx
+        else maxes bs True
+    else
+      if by >= (maxes bs False)
+        then by
+      else maxes bs False
 
 
 getSet :: Piece -> [Piece]
-getSet p = [p,
+getSet p = [p]
+{-
             (offset (rotate p) (0,(maxX p))),
             (offset (rotate (rotate p)) (0,(2 * (maxX p)))),
             (offset (rotate (rotate (rotate p))) (0,(3 * (maxX p)))),
@@ -84,3 +94,12 @@ getSet p = [p,
             (offset (rotate (reflect p)) ((maxY p),(maxX p))),
             (offset (rotate (rotate (reflect p))) ((maxY p),(2 * (maxX p)))),
             (offset (rotate (rotate (rotate (reflect p)))) ((maxY p),(3 * (maxX p))))]
+-}
+             --width  height
+createMatrix :: Int -> Int -> [[Char]]
+createMatrix _ 0 = []
+createMatrix n m = (createRow n) : (createMatrix n (m-1))
+
+createRow :: Int -> [Char]
+createRow 0 = []
+createRow n = '#' : (createRow (n-1))
