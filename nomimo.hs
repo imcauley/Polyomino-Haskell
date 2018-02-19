@@ -22,9 +22,24 @@ piece4 = [('A', 0, 0),('A', 0, 1),('A', 1, 1)]
 piece5 :: Piece
 piece5 = [('B', 0, 0)]
 
+main = do
+  contents <- readFile "6.txt"
+  let (s:ss) = lines contents
+  let board = parseBoard s
+  let pieces = parsePieces ss
+  let solution = (findSolutions pieces board) !! 0
+  putStrLn (show solution)
+
+parsePieces :: [String] -> [Piece]
+parsePieces [] = []
+parsePieces (s:ss) = (parsePiece s (chr  (65 + length ss))): (parsePieces ss)
+
 parsePiece :: String -> Char -> Piece
 parsePiece [] _ = []
 parsePiece (s1:a:s2:b:rest) c = (c,(digitToInt a), (digitToInt b)) : (parsePiece rest c)
+
+parseBoard :: String -> (Int,Int)
+parseBoard (w:s:h) = ((digitToInt w),(digitToInt h))
 
 findSolutions :: [Piece] -> (Int,Int) -> [Board]
 findSolutions [] _ = [[]]
@@ -85,8 +100,7 @@ maxes ((b, bx, by):bs) c =
 
 
 getSet :: Piece -> [Piece]
-getSet p = [p]
-{-
+getSet p = [p,
             (offset (rotate p) (0,(maxX p))),
             (offset (rotate (rotate p)) (0,(2 * (maxX p)))),
             (offset (rotate (rotate (rotate p))) (0,(3 * (maxX p)))),
@@ -94,7 +108,6 @@ getSet p = [p]
             (offset (rotate (reflect p)) ((maxY p),(maxX p))),
             (offset (rotate (rotate (reflect p))) ((maxY p),(2 * (maxX p)))),
             (offset (rotate (rotate (rotate (reflect p)))) ((maxY p),(3 * (maxX p))))]
--}
              --width  height
 createMatrix :: Int -> Int -> [[Char]]
 createMatrix _ 0 = []
