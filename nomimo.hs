@@ -28,7 +28,8 @@ main = do
   let board = parseBoard s
   let pieces = parsePieces ss
   let solution = (findSolutions pieces board) !! 0
-  putStrLn (show solution)
+  let matrix = putBoard solution (createMatrix board)
+  (printBoard matrix)
 
 parsePieces :: [String] -> [Piece]
 parsePieces [] = []
@@ -39,7 +40,7 @@ parsePiece [] _ = []
 parsePiece (s1:a:s2:b:rest) c = (c,(digitToInt a), (digitToInt b)) : (parsePiece rest c)
 
 parseBoard :: String -> (Int,Int)
-parseBoard (w:s:h) = ((digitToInt w),(digitToInt h))
+parseBoard (w:s:h:rest) = ((digitToInt w),(digitToInt h))
 
 findSolutions :: [Piece] -> (Int,Int) -> [Board]
 findSolutions [] _ = [[]]
@@ -85,34 +86,48 @@ rotate :: Piece -> Piece
 rotate [] = []
 rotate ((b, bx, by):bs) = ((b, by, (-bx)): (rotate bs))
 
-maxes :: Piece -> Bool -> Int
-maxes [] _ = 0
-maxes ((b, bx, by):bs) c =
-  if c == True
-    then
-      if bx >= (maxes bs True)
-        then bx
-        else maxes bs True
-    else
-      if by >= (maxes bs False)
-        then by
-      else maxes bs False
 
+mins :: Piece -> (Int,Int)
+mins [] = (0,0)
+mins ((a, ax, ay):as)
+  | (ax < (fst (mins as))) && (ay < (snd (mins as))) = (ax,ay)
+  | ax < (fst (mins as)) = (ax,(snd (mins as)))
+  | ay < (snd (mins as)) = ((fst (mins as)),ay)
+  | otherwise = mins as
+
+center :: Piece -> Piece
+center [] = []
+center p = let off = (mins p)
+           in offset p (abs (fst off), abs (snd off))
 
 getSet :: Piece -> [Piece]
-getSet p = [p,
-            (offset (rotate p) (0,(maxX p))),
-            (offset (rotate (rotate p)) (0,(2 * (maxX p)))),
-            (offset (rotate (rotate (rotate p))) (0,(3 * (maxX p)))),
-            (offset (reflect p) ((maxY p),0)),
-            (offset (rotate (reflect p)) ((maxY p),(maxX p))),
-            (offset (rotate (rotate (reflect p))) ((maxY p),(2 * (maxX p)))),
-            (offset (rotate (rotate (rotate (reflect p)))) ((maxY p),(3 * (maxX p))))]
-             --width  height
-createMatrix :: Int -> Int -> [[Char]]
-createMatrix _ 0 = []
-createMatrix n m = (createRow n) : (createMatrix n (m-1))
+getSet p = [(center ((iterate rotate p) !! n)) | n <- [0..3], q <- [0..1]]
+
+
+putBoard :: Board -> [[Char]] -> [[Char]]
+putBoard [] b = b
+putBoard ((a,(x,y)):as) b = putBoard as (putPiece a (x,y) b)
+
+putPiece :: Piece -> (Int,Int) -> [[Char]] -> [[Char]]
+putPiece [] _ b = b
+putPiece ((a, ax, ay):as) (x,y) b = putPiece as (x,y) (putBlockCol b ((ax + x), (ay + y)) a)
+
+putBlockRow :: [Char] -> Int -> Char -> [Char]
+putBlockRow (b:bs) 0 c = c : bs
+putBlockRow (b:bs) n c = b : (putBlockRow bs (n-1) c)
+
+putBlockCol :: [[Char]] -> (Int, Int) -> Char -> [[Char]]
+putBlockCol (b:bs) (0,m) c = (putBlockRow b m c) : bs
+putBlockCol (b:bs) (n,m) c = b : (putBlockCol bs ((n-1), m) c)
+
+createMatrix :: (Int, Int) -> [[Char]]
+createMatrix (_, 0) = []
+createMatrix (n, m) = (createRow n) : (createMatrix (n, (m-1)))
 
 createRow :: Int -> [Char]
 createRow 0 = []
 createRow n = '#' : (createRow (n-1))
+
+printBoard :: [String] -> IO ()
+printBoard [] = putChar ' '
+printBoard a = mapM_ putStrLn a
