@@ -14,8 +14,7 @@ piece2 :: Piece
 piece2 = [('B', 0, 0), ('B', 0, 1)]
 piece3 :: Piece
 piece3 = [('C', 0, 0), ('C', 0, 1)]
-coord1 :: (Int, Int)
-coord1 = (2,3)
+
 
 piece4 :: Piece
 piece4 = [('A', 0, 0),('A', 0, 1),('A', 1, 1)]
@@ -78,13 +77,19 @@ offset :: Piece -> (Int, Int) -> Piece
 offset [] _ = []
 offset ((b, bx, by):bs) (x,y) = (b, (bx + x), (by + y)) : (offset bs (x,y))
 
-reflect :: Piece -> Piece
-reflect [] = []
-reflect ((b, bx, by):bs) = ((b, bx, (-by)): (rotate bs))
+reflect :: Piece -> Int -> Piece
+reflect p n = (iterate reflectPiece p) !! n
 
-rotate :: Piece -> Piece
-rotate [] = []
-rotate ((b, bx, by):bs) = ((b, by, (-bx)): (rotate bs))
+reflectPiece :: Piece -> Piece
+reflectPiece [] = []
+reflectPiece ((b, bx, by):bs) = ((b, bx, (-by)): (reflectPiece bs))
+
+rotate :: Piece -> Int -> Piece
+rotate p n = (iterate rotatePiece p) !! n
+
+rotatePiece :: Piece -> Piece
+rotatePiece [] = []
+rotatePiece ((b, bx, by):bs) = ((b, by, (-bx)): (rotatePiece bs))
 
 
 mins :: Piece -> (Int,Int)
@@ -101,8 +106,8 @@ center p = let off = (mins p)
            in offset p (abs (fst off), abs (snd off))
 
 getSet :: Piece -> [Piece]
-getSet p = [(center ((iterate rotate p) !! n)) | n <- [0..3], q <- [0..1]]
-
+getSet p = [center (reflect (rotate p n) q) | n <- [0..3],
+                                              q <- [0..1]]
 
 putBoard :: Board -> [[Char]] -> [[Char]]
 putBoard [] b = b
