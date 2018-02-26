@@ -3,6 +3,8 @@
 
 import Data.List
 import Data.Char
+import System.Environment (getArgs)
+
 
 type Block = (Char, Int, Int)
 type Piece = [Block]
@@ -22,7 +24,8 @@ piece5 :: Piece
 piece5 = [('B', 0, 0)]
 
 main = do
-  contents <- readFile "6.txt"
+  args <- getArgs
+  contents <- readFile (head args)
   let (s:ss) = lines contents
   let board = parseBoard s
   let pieces = parsePieces ss
