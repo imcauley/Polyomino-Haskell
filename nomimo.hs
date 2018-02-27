@@ -18,7 +18,7 @@ main = do
   let board = parseBoard s
   let pieces = parsePieces ss
   case ((findSolutions pieces board) !! 0) of
-    (Just n) -> (printBoard (putBoard n (createMatrix board)))
+    (Just n) -> printBoard (putBoard n (createMatrix board))
     Nothing -> putStrLn "No solution"
 
 
@@ -149,8 +149,8 @@ putBlockRow (b:bs) 0 c = c : bs
 putBlockRow (b:bs) n c = b : (putBlockRow bs (n-1) c)
 
 putBlockCol :: [[Char]] -> (Int, Int) -> Char -> [[Char]]
-putBlockCol (b:bs) (0,m) c = (putBlockRow b m c) : bs
-putBlockCol (b:bs) (n,m) c = b : (putBlockCol bs ((n-1), m) c)
+putBlockCol (b:bs) (n,0) c = (putBlockRow b n c) : bs
+putBlockCol (b:bs) (n,m) c = b : (putBlockCol bs (n, (m-1)) c)
 
 createMatrix :: (Int, Int) -> [[Char]]
 createMatrix (_, 0) = []
