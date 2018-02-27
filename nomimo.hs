@@ -17,9 +17,9 @@ main = do
   let (s:ss) = lines contents
   let board = parseBoard s
   let pieces = parsePieces ss
-  let solution = (findSolutions pieces board) !! 0
-  let matrix = putBoard solution (createMatrix board)
-  (printBoard matrix)
+  case ((findSolutions pieces board) !! 0) of
+    (Just n) -> (printBoard (putBoard n (createMatrix board)))
+    Nothing -> putStrLn "No solution"
 
 
 
@@ -38,16 +38,17 @@ parseBoard :: String -> (Int,Int)
 parseBoard (w:_:h:rest) = ((digitToInt w),(digitToInt h))
 
 
+
 -- SOLUTION FINDER
 
-findSolutions :: [Piece] -> (Int,Int) -> [Board]
-findSolutions [] _ = [[]]
-findSolutions (p:ps) (w,h) = [(c,(x,y)) : board | board <- (findSolutions ps (w,h)),
-                                                  x <- [0..w],
-                                                  y <- [0..h],
-                                                  c <- (getSet p),
-                                                  inBounds c (x,y) (w,h),
-                                                  fits c (x,y) board]
+findSolutions :: [Piece] -> (Int,Int) -> [Maybe Board]
+findSolutions [] _ = [Just []]
+findSolutions (p:ps) (w,h) = [Just ((c,(x,y)) : board) | Just board <- (findSolutions ps (w,h)),
+                                                         x <- [0..w],
+                                                          y <- [0..h],
+                                                          c <- (getSet p),
+                                                          inBounds c (x,y) (w,h),
+                                                          fits c (x,y) board] ++ [Nothing]
 
 fits :: Piece -> (Int, Int) -> Board -> Bool
 fits _ _ [] = True
