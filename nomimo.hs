@@ -10,18 +10,6 @@ type Block = (Char, Int, Int)
 type Piece = [Block]
 type Board = [(Piece, (Int, Int))]
 
-piece1 :: Piece
-piece1 = [('A', 0, 0), ('A', 0, 1)]
-piece2 :: Piece
-piece2 = [('B', 0, 0), ('B', 0, 1)]
-piece3 :: Piece
-piece3 = [('C', 0, 0), ('C', 0, 1)]
-
-
-piece4 :: Piece
-piece4 = [('A', 0, 0),('A', 0, 1),('A', 1, 1)]
-piece5 :: Piece
-piece5 = [('B', 0, 0)]
 
 main = do
   args <- getArgs
@@ -33,16 +21,24 @@ main = do
   let matrix = putBoard solution (createMatrix board)
   (printBoard matrix)
 
+
+
+
+-- INPUT
+
 parsePieces :: [String] -> [Piece]
 parsePieces [] = []
 parsePieces (s:ss) = (parsePiece s (chr  (65 + length ss))): (parsePieces ss)
 
 parsePiece :: String -> Char -> Piece
 parsePiece [] _ = []
-parsePiece (s1:a:s2:b:rest) c = (c,(digitToInt a), (digitToInt b)) : (parsePiece rest c)
+parsePiece (_:a:_:b:rest) c = (c,(digitToInt a), (digitToInt b)) : (parsePiece rest c)
 
 parseBoard :: String -> (Int,Int)
-parseBoard (w:s:h:rest) = ((digitToInt w),(digitToInt h))
+parseBoard (w:_:h:rest) = ((digitToInt w),(digitToInt h))
+
+
+-- SOLUTION FINDER
 
 findSolutions :: [Piece] -> (Int,Int) -> [Board]
 findSolutions [] _ = [[]]
@@ -80,6 +76,10 @@ offset :: Piece -> (Int, Int) -> Piece
 offset [] _ = []
 offset ((b, bx, by):bs) (x,y) = (b, (bx + x), (by + y)) : (offset bs (x,y))
 
+
+
+-- PIECE GENERATION
+
 reflect :: Piece -> Int -> Piece
 reflect p n = (iterate reflectPiece p) !! n
 
@@ -108,9 +108,32 @@ center [] = []
 center p = let off = (mins p)
            in offset p (abs (fst off), abs (snd off))
 
+removeDupes :: [Piece] -> [Piece]
+removeDupes [] = []
+removeDupes (p:ps) = p : ((removeDupePiece p ps) ++ (removeDupes (removeDupePiece p ps)))
+
+removeDupePiece :: Piece -> [Piece] -> [Piece]
+removeDupePiece p [] = []
+removeDupePiece a (b:ps)
+  | samePiece a b = removeDupePiece a ps
+  | otherwise = b : (removeDupePiece a ps)
+
+samePiece :: Piece -> Piece -> Bool
+samePiece [] [] = True
+samePiece _ [] = False
+samePiece [] _ = False
+samePiece ((a, ax, ay):as) ((b, bx, by):bs)
+  | (ax == bx) && (ay == by) = samePiece as bs
+  | (ax == by) && (ay == bx) = samePiece as bs
+  | otherwise = False
+
 getSet :: Piece -> [Piece]
-getSet p = [center (reflect (rotate p n) q) | n <- [0..3],
-                                              q <- [0..1]]
+getSet p = removeDupes [center (reflect (rotate p n) q) | n <- [0..3],
+                                                          q <- [0..1]]
+
+
+
+-- OUTPUT
 
 putBoard :: Board -> [[Char]] -> [[Char]]
 putBoard [] b = b
