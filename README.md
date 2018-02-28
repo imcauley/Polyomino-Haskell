@@ -15,26 +15,22 @@ The input file but be in the following format:
 
 ~~~~
 Rows Columns
-  Block1 Block2
-  Block3 Block4 Block5
-  etc
+NumPieces
+NumBlocks Block1 Block2
+NumBlocks Block3 Block4 Block5
+etc
 ~~~~
-Each x and y must be separated by a single space and each set must be preceded by two spaces.
 
 Note: The parser does not work on coordinates that are more than 1 digit.
         i.e. (19,2)
 
-Examples:
+Example:
 
 ~~~~
-3 3
-  0 0  1 0  2 0  1 1
-  0 0  1 0  0 1  0 2  1 2
+2 4
+2
+4  0 0  1 0  0 1  1 1
+4  0 0  1 0  0 1  1 1
 ~~~~
 
-~~~~
-3 5
-  0 0  0 1  0 2  0 3  0 4
-  0 0  0 1  0 2  0 3  0 4
-  0 0  0 1  0 2  0 3  0 4
-~~~~
+For more examples see the input folder.

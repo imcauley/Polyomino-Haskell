@@ -14,7 +14,7 @@ type Board = [(Piece, (Int, Int))]
 main = do
   args <- getArgs
   contents <- readFile (head args)
-  let (s:ss) = lines contents
+  let (s:_:ss) = lines contents
   let board = parseBoard s
   let pieces = parsePieces ss
   case ((findSolutions pieces board) !! 0) of
@@ -28,7 +28,7 @@ main = do
 
 parsePieces :: [String] -> [Piece]
 parsePieces [] = []
-parsePieces (s:ss) = (parsePiece s (chr  (65 + length ss))): (parsePieces ss)
+parsePieces ((_:s):ss) = (parsePiece s (chr  (65 + length ss))): (parsePieces ss)
 
 parsePiece :: String -> Char -> Piece
 parsePiece [] _ = []
