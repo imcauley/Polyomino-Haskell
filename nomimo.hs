@@ -32,7 +32,7 @@ parsePieces (s:ss) = (parsePiece s (chr  (65 + length ss))): (parsePieces ss)
 
 parsePiece :: String -> Char -> Piece
 parsePiece [] _ = []
-parsePiece (_:a:_:b:rest) c = (c,(digitToInt a), (digitToInt b)) : (parsePiece rest c)
+parsePiece (_:_:a:_:b:rest) c = (c,(digitToInt a), (digitToInt b)) : (parsePiece rest c)
 
 parseBoard :: String -> (Int,Int)
 parseBoard (w:_:h:rest) = ((digitToInt w),(digitToInt h))
